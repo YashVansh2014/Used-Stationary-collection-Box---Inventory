@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<!-- saved from url=(0032)http://127.0.0.1:5500/Index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Used Stationery Box — Inventory</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;margin:18px;color:#111}
+    h1{font-size:20px;margin-bottom:6px}
+    .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    label{font-size:13px}
+    input,select,textarea,button{font-size:14px;padding:8px;border:1px solid #ccc;border-radius:6px}
+    input[type="number"]{width:110px}
+    button{cursor:pointer}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px;border:1px solid #e5e5e5;text-align:left}
+    th{background:#f7f7f7}
+    .actions button{margin-right:6px}
+    .summary{margin-top:12px;padding:10px;border-radius:8px;background:#f3f9f3;border:1px solid #e0f0df}
+  </style>
+</head>
+
+<body>
+
+<h1>Used Stationery Box — Inventory Tracker</h1>
+
+<!-- Form -->
+<div class="row">
+  <input id="name" placeholder="Item name (e.g., Pen)">
+  <input id="type" placeholder="Type (Gel, Ball, Pencil, etc.)">
+  <input id="qty" type="number" placeholder="Qty" min="1">
+  <input id="cost" type="number" placeholder="Cost (₹)" min="0" step="0.01">
+  <button onclick="addItem()">Add</button>
+</div>
+
+<textarea id="notes" placeholder="Notes (optional)" style="width:100%;height:60px;margin-bottom:10px"></textarea>
+
+<!-- Table -->
+<table id="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Qty</th>
+      <th>Cost (₹)</th>
+      <th>Notes</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody><tr>
+        <td>Blue roller pen</td>
+        <td>Roller Gel</td>
+        <td>4</td>
+        <td>₹6</td>
+        <td>2nd hand</td>
+        <td class="actions">
+          <button onclick="editItem(0)">Edit</button>
+          <button onclick="delItem(0)">Delete</button>
+        </td>
+      </tr></tbody>
+</table>
+
+<div class="summary" id="summary"><b>Total Quantity:</b> 4 items<br>
+       <b>Total Cost:</b> ₹24.00</div>
+
+<script>
+  let items = JSON.parse(localStorage.getItem("stationeryItems") || "[]");
+
+  function save() {
+    localStorage.setItem("stationeryItems", JSON.stringify(items));
+  }
+
+  function render() {
+    const tbody = document.querySelector("#table tbody");
+    tbody.innerHTML = "";
+
+    let totalQty = 0;
+    let totalCost = 0;
+
+    items.forEach((item, i) => {
+      totalQty += Number(item.qty);
+      totalCost += Number(item.cost) * Number(item.qty);
+
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.type}</td>
+        <td>${item.qty}</td>
+        <td>₹${item.cost}</td>
+        <td>${item.notes || ""}</td>
+        <td class="actions">
+          <button onclick="editItem(${i})">Edit</button>
+          <button onclick="delItem(${i})">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("summary").innerHTML =
+      `<b>Total Quantity:</b> ${totalQty} items<br>
+       <b>Total Cost:</b> ₹${totalCost.toFixed(2)}`;
+  }
+
+  function addItem() {
+    const name = document.getElementById("name").value.trim();
+    const type = document.getElementById("type").value.trim();
+    const qty = document.getElementById("qty").value;
+    const cost = document.getElementById("cost").value;
+    const notes = document.getElementById("notes").value.trim();
+
+    if (!name || !qty || !cost) {
+      alert("Please fill name, quantity, and cost.");
+      return;
+    }
+
+    items.push({ name, type, qty, cost, notes });
+    save();
+    render();
+
+    document.getElementById("name").value = "";
+    document.getElementById("type").value = "";
+    document.getElementById("qty").value = "";
+    document.getElementById("cost").value = "";
+    document.getElementById("notes").value = "";
+  }
+
+  function editItem(i) {
+    const item = items[i];
+    const name = prompt("Item Name:", item.name);
+    const type = prompt("Type:", item.type);
+    const qty = prompt("Quantity:", item.qty);
+    const cost = prompt("Cost (₹):", item.cost);
+    const notes = prompt("Notes:", item.notes);
+
+    if (name && qty && cost) {
+      items[i] = { name, type, qty, cost, notes };
+      save();
+      render();
+    }
+  }
+
+  function delItem(i) {
+    if (confirm("Delete this item?")) {
+      items.splice(i, 1);
+      save();
+      render();
+    }
+  }
+
+  render();
+</script>
+
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+
+</body></html>
